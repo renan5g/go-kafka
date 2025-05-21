@@ -8,7 +8,6 @@ import (
 // Logger interface para permitir qualquer tipo de logger
 type Logger interface {
 	Printf(format string, v ...any)
-	Println(v ...any)
 }
 
 // StdLogger é uma implementação simples da interface Logger
@@ -29,10 +28,6 @@ func (l *StdLogger) Printf(format string, v ...any) {
 	l.logger.Printf(format, v...)
 }
 
-func (l *StdLogger) Println(v ...any) {
-	l.logger.Println(v...)
-}
-
 // NoOpLogger é um logger que não faz nada
 type NoOpLogger struct{}
 
@@ -43,5 +38,3 @@ func NewNoOpLogger() *NoOpLogger {
 
 // Printf implementa a interface Logger sem fazer nada
 func (l *NoOpLogger) Printf(format string, v ...any) {}
-
-func (l *NoOpLogger) Println(v ...any) {}
