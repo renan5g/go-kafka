@@ -53,9 +53,8 @@ type Producer interface {
 }
 
 type producer struct {
-	writer      *kafka.Writer
-	logger      Logger
-	errorLogger Logger
+	writer *kafka.Writer
+	logger Logger
 }
 
 // NewProducer creates a new Kafka producer with the provided options
@@ -65,26 +64,21 @@ func NewProducer(options ...ProducerOption) Producer {
 
 // NewProducerFromConfig creates a new Kafka producer from a config
 func NewProducerFromConfig(config ProducerConfig) Producer {
-	errLogger := config.ErrorLogger
+	logger := config.Logger
 	dialer := config.Dialer
 
 	if config.SecurityConfig != nil {
 		sec := config.SecurityConfig
-		if sec.SASL {
-			mechanism, err := getSASLMechanism(sec)
+		if sec.EnableSASL {
+			mechanism, err := DefaultSASLMechanismFactory(sec.SASL)
 			if err != nil {
-				errLogger.Printf("error configuring SASL: %v", err)
+				logger.Printf("error configuring SASL mechanism: %v", err)
 			} else {
 				dialer.SASLMechanism = mechanism
 			}
 		}
 		if sec.EnableTLS {
-			tlsConfig, err := createTLSConfig(sec)
-			if err != nil {
-				errLogger.Printf("error configuring TLS: %v", err)
-			} else {
-				dialer.TLS = tlsConfig
-			}
+			dialer.TLS = sec.TLSConfig
 		}
 	}
 	writer := kafka.NewWriter(kafka.WriterConfig{
@@ -100,13 +94,12 @@ func NewProducerFromConfig(config ProducerConfig) Producer {
 		Async:            config.Async,
 		CompressionCodec: config.Compression,
 		RequiredAcks:     int(config.RequiredAcks),
-		Logger:           errLogger,
-		ErrorLogger:      errLogger,
+		Logger:           logger,
+		ErrorLogger:      logger,
 	})
 	return &producer{
-		writer:      writer,
-		logger:      config.Logger,
-		errorLogger: errLogger,
+		writer: writer,
+		logger: config.Logger,
 	}
 }
 

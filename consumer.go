@@ -114,32 +114,25 @@ func NewConsumer(options ...ConsumerOption) Consumer {
 func NewConsumerFromConfig(config ConsumerConfig) Consumer {
 	logger := config.Logger
 	dialer := config.Dialer
-
 	if config.SecurityConfig != nil {
 		sec := config.SecurityConfig
-
-		if sec.SASL {
-			mechanism, err := getSASLMechanism(sec)
+		if sec.EnableSASL {
+			mechanism, err := DefaultSASLMechanismFactory(sec.SASL)
 			if err != nil {
-				logger.Printf("error configuring SASL: %v", err)
+				logger.Printf("error configuring SASL mechanism: %v", err)
 			} else {
 				dialer.SASLMechanism = mechanism
 			}
 		}
-
 		if sec.EnableTLS {
-			tlsConfig, err := createTLSConfig(sec)
-			if err != nil {
-				logger.Printf("error configuring TLS: %v", err)
-			} else {
-				dialer.TLS = tlsConfig
-			}
+			dialer.TLS = sec.TLSConfig
 		}
 	}
-
 	readerConfig := kafka.ReaderConfig{
 		Brokers:           config.Brokers,
 		GroupID:           config.GroupID,
+		GroupTopics:       config.GroupTopics,
+		Topic:             config.Topic,
 		StartOffset:       config.StartOffset,
 		MinBytes:          config.MinBytes,
 		MaxBytes:          config.MaxBytes,
@@ -155,15 +148,7 @@ func NewConsumerFromConfig(config ConsumerConfig) Consumer {
 		ReadBackoffMax:    config.ReadBackoffMax,
 		Dialer:            dialer,
 	}
-
-	if len(config.GroupTopics) > 1 {
-		readerConfig.GroupTopics = config.GroupTopics
-	} else {
-		readerConfig.Topic = config.Topic
-	}
-
 	reader := kafka.NewReader(readerConfig)
-
 	return &consumer{
 		reader: reader,
 		logger: logger,

@@ -76,10 +76,6 @@ type ProducerConfig struct {
 	// writer.
 	Logger Logger
 
-	// ErrorLogger is the logger used to report errors. If nil, the writer falls
-	// back to using Logger instead.
-	ErrorLogger Logger
-
 	// SecurityConfig holds the security configuration for the producer.
 	// If not nil, it will be used to configure the security settings for the producer.
 	SecurityConfig *SecurityConfig
