@@ -5,18 +5,17 @@ import (
 	"os"
 )
 
-// Logger interface para permitir qualquer tipo de logger
+// Logger  is an interface that defines a logging method for printing formatted strings.
 type Logger interface {
 	Printf(format string, v ...any)
 }
 
-// StdLogger é uma implementação simples da interface Logger
+// StdLogger implements a Logger that writes to stdout
 type StdLogger struct {
 	logger *log.Logger
 	prefix string
 }
 
-// NewStdLogger cria um novo logger para stdout com prefixo
 func NewStdLogger(prefix string) *StdLogger {
 	return &StdLogger{
 		logger: log.New(os.Stdout, prefix, log.LstdFlags),
@@ -28,13 +27,11 @@ func (l *StdLogger) Printf(format string, v ...any) {
 	l.logger.Printf(format, v...)
 }
 
-// NoOpLogger é um logger que não faz nada
+// NoOpLogger implements a Logger that does nothing
 type NoOpLogger struct{}
 
-// NewNoOpLogger cria um logger que não registra nada
 func NewNoOpLogger() *NoOpLogger {
 	return &NoOpLogger{}
 }
 
-// Printf implementa a interface Logger sem fazer nada
 func (l *NoOpLogger) Printf(format string, v ...any) {}
