@@ -18,14 +18,14 @@ type Consumer interface {
 	Consume(ctx context.Context) (Message, error)
 	ConsumeWithHandler(ctx context.Context, handler MessageHandler, opts ...ConsumerHandlerOption)
 	ConsumeWithWorkerPool(ctx context.Context, handler MessageHandler, concurrency int)
-	CommitMessages(ctx context.Context, msgs ...Message) error
+	CommitMessages(ctx context.Context, msgs ...kafka.Message) error
 	Stats() kafka.ReaderStats
 	SetOffset(offset int64) error
 	Close() error
 }
 
 // MessageHandler é um callback para processamento de mensagens
-type MessageHandler func(Message) error
+type MessageHandler func(kafka.Message) error
 
 // consumer encapsula um consumidor Kafka
 type consumer struct {
@@ -203,7 +203,7 @@ func (c *consumer) ConsumeWithWorkerPool(ctx context.Context, handler MessageHan
 }
 
 // CommitMessages confirma múltiplas mensagens
-func (c *consumer) CommitMessages(ctx context.Context, msgs ...Message) error {
+func (c *consumer) CommitMessages(ctx context.Context, msgs ...kafka.Message) error {
 	return c.reader.CommitMessages(ctx, msgs...)
 }
 

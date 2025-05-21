@@ -9,7 +9,7 @@ import (
 // Producer define a interface para um produtor Kafka
 type Producer interface {
 	// ProduceMessages envia múltiplas mensagens para o Kafka
-	ProduceMessages(ctx context.Context, messages ...Message) error
+	ProduceMessages(ctx context.Context, messages ...kafka.Message) error
 
 	// Stats retorna estatísticas do produtor
 	Stats() kafka.WriterStats
